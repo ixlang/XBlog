@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<meta name="Description" content="Information architecture, Web Design, Web Standards." />
+<meta name="Keywords" content="your, keywords" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="Distribution" content="Global" />
+<meta name="Author" content="Erwin Aligam - ealigam@gmail.com" />
+<meta name="Robots" content="index,follow" />
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/web.js"></script>
+<script type="text/javascript" src="HandyEditor/external/code/prettify.js"></script>
+<link rel="stylesheet" href="HandyEditor/external/code/prettify.css" type="text/css" />
+<link rel="stylesheet" href="images/HarvestField.css" type="text/css" />
+<link rel="stylesheet" type="text/css" href="highlight/styles/dark.css"/>
+<script type="text/javascript" src="highlight/highlight.pack.js"></script>
+
+<title>编辑文章</title></head>
+
+<body>
+<!-- wrap starts here -->
+<div id="wrap">
+
+	<!--header -->
+	<div id="header">			
+				
+		<h1 id="logo-text"><a href="index.html" title="">XLANG's<span> - blog</span></a></h1>		
+		<p id="slogan">http://blog.xlang.link</p>	
+			
+		<div id="header-links">
+			<p>
+				<a href="index.html">首页</a>	| 
+				<a href="contact.html">联系</a> 	
+			</p>		
+		</div>				
+				
+	<!--header ends-->					
+	</div>
+		
+	<!-- navigation starts-->	
+	<div  id="nav">
+		<ul>
+			<li id="current"><a id="modistat" href="index.html">写新文章</a></li>
+			<li><a href="index.html">文章</a></li>
+			<li><a href="contact.html">关于</a></li>		
+		</ul>
+		
+	<!-- navigation ends-->	
+	</div>	
+		
+	<!-- content-wrap starts -->
+	<div style="padding: 8px">
+
+		<div id="maineditor" style="width: 100%; display: none;">
+				
+			<div id="article_content" style="height: 800px">
+				<div class="formRow">
+                    <label for="title" style="color: #ccc">标题:</label>
+                    <input type="text" name="title" class="validate[required]" id="title" />
+
+                    <label for="category" style="color: #ccc">分类:</label>
+                    <select type="text" name="category" class="validate[required]" id="category" >
+                    	<option value="0">未分类</option>
+                    </select>
+                    <input type="button" value="增加分类" style="width: 80px;" id="addcategory" onclick="add_category()"/>
+                </div>
+                <label for="editor" style="color: #ccc">正文:</label>
+				<textarea id="editor" name="editor" rows="5" style="display: none;">
+
+				</textarea>
+				<div >
+					<div style="color: #ccc;" >
+					<label><input style="vertical-align:middle" type="checkbox" name="private" id="private" value="0">私有</label>
+                    <label><input style="vertical-align:middle" type="checkbox" name="nocomment" id="nocomment" value="0">禁止评论</label>
+                    </div>
+                    <input type="button" value="发表" style="width: 80px;" id="enter" class="dredB logMeIn" onclick="post_article()"/>
+                    <div class="clear"></div>
+                </div>
+			</div>			
+		<!-- main ends -->	
+		</div>
+	<!-- content-wrap ends-->	
+	</div>
+	
+	<!-- column starts -->		
+	
+	<script src="HandyEditor/HandyEditor.min.js"></script>
+	<script type="text/javascript">
+	  	function trimStr(str){return str.replace(/(^\s*)|(\s*$)/g,"");}
+      	var he = HE.getEditor('editor',
+      		{
+		        autoHeight: true,
+		        autoFloat: false,
+		        topOffset: 0,
+		        uploadPhoto: true,
+		        uploadPhotoUrl: "upload",
+		        uploadPhotoHandler: "upload.html",
+		        uploadPhotoSize: 2048,
+		        uploadPhotoType: 'gif,png,jpg,jpeg',
+		        uploadPhotoSizeError: '不能上传大于2MB的图片',
+		        uploadPhotoTypeError: '只能上传gif,png,jpg,jpeg格式的图片',
+		        lang: 'zh-jian',
+		        skin: 'HandyEditor',
+		        externalSkin: '',
+		        item: ['bold', 'italic', 'strike', 'underline', 'fontSize', 'fontName', 'paragraph', 'color', 'backColor', '|', 'center', 'left', 'right', 'full', 'indent', 'outdent', '|', 'link', 'unlink', 'textBlock', 'code', 'selectAll', 'removeFormat', 'trash', '|', 'image', 'expression', 'subscript', 'superscript', 'horizontal', 'orderedList', 'unorderedList', '|', 'undo', 'redo', '|', 'html', '|', 'about']
+		    });
+      	he.config.height = '400px';
+
+      	var actid = getArgs("id");
+	  	if (actid != false){
+			actid = parseInt(actid);
+		}
+
+		function add_category(){
+			var newcategory = window.prompt("增加分类","输入新的类别");
+			if (newcategory == false){
+				return;
+			}
+			newcategory = trimStr(newcategory);
+			if (newcategory.length == 0){
+				return;
+			}
+
+			var content = {
+				'category' : newcategory,
+				'option' : "add",
+			};
+
+			$.ajax({
+				type: "POST",
+				url: "listcategories.html",
+				dataType: "json", //表示返回值类型，不必须
+				data: content,
+				success: function (jsonResult) {
+					if (jsonResult.error == 0){
+						category.options.add(new Option(newcategory,jsonResult.id)); 
+					}else{
+						alert('添加分类失败.');
+        				return ;
+					}
+				}
+			});
+
+		}
+
+		$.ajax({
+			type: "GET",
+			url: "listcategories.html",
+			dataType: "json", //表示返回值类型，不必须
+			success: function (jsonResult) {
+				loadCategory(jsonResult);
+				if (actid != false){
+					loadExists(actid);
+					modistat.innerText = "修改文章";
+				}
+			}
+		});
+
+		function loadExists(id){
+			var content = {
+				'id' : id,
+			};
+
+			$.ajax({
+				type: "GET",
+				url: "getarticle.html",
+				dataType: "json", //表示返回值类型，不必须
+				data: content,
+				success: function (jsonResult) {
+					loadBlog(jsonResult);
+				}
+			});
+		}
+
+		function loadBlog(data){
+			var blogs = data.data;
+			for (var b in blogs){
+				var b = blogs[b];
+
+				title.value = b.name;
+				he.set(b.content);
+
+				var all_options = category.options;
+
+				for (i=0; i<all_options.length; i++){
+					if (all_options[i].text == b.category) {
+						all_options[i].selected = true;
+					}else{
+						all_options[i].selected = false;
+					}
+				}
+
+				if ((b.flag & 1) ==1 ){
+					private.checked = true;
+				}
+				if ((b.flag & 2) ==2 ){
+					nocomment.checked = true;
+				}
+			}
+		}
+
+	    function post_article(){
+      		var $title = title.value;
+      		var $category = category.value;
+      		var $categorytext = category.options[category.selectedIndex].text;
+      		var $content = he.getHtml();
+      		var $private = private.checked;
+      		var $nocomment = nocomment.checked;
+
+      		var $flags = 0;
+      		if ($private == true){
+      			$flags |= 1;
+      		}
+      		if ($nocomment == true){
+      			$flags |= 2;
+      		}
+        	if ((trimStr($title).length == 0) || (trimStr($content).length == 0)){
+        		alert('请检查所需字段是否填写完整.');
+        		return ;
+        	}
+        	
+    		var content = {
+    			'id' : ((actid == false )? 0 : actid),
+				'title' : $title,
+				'category' : $categorytext,
+				'categoryid' : $category,
+				'content' : $content,
+				'flags' : $flags,
+    		};
+
+            $.ajax({
+    			type: "POST",
+    			url: "postarticle.html",
+    			dataType: "json", //表示返回值类型，不必须
+    			data: content,
+    			success: function (jsonResult) {
+    				if (jsonResult.hasOwnProperty('error')) {
+    					if (jsonResult.error == 0) {
+    						window.location = 'article.html?id=' + jsonResult.id;
+    					} else {
+    						alert('发表文章失败.');
+    					}
+    				}
+    			}
+    		});
+
+            return false;
+	    }
+
+	    function loadCategory(data){
+	    	var categorys = data.data;
+	    	var admin = data.admin;
+	    	if (admin == false){
+	    		alert('权限不足');
+	    	}else{
+	    		maineditor.style.display = '';
+	    		for (var b in categorys){
+					var b = categorys[b];
+					category.options.add(new Option(b.name,b.id)); 
+				}
+	    	}
+	    	
+	    }
+
+
+    </script>
+
+	<!-- footer starts -->
+	<div id="footer">				
+		<p>	&copy; Cadaqs 2019 <strong>xlang2.7</strong> </p>
+	<!-- footer ends -->		
+	</div>	
+
+<!-- wrap ends here -->
+</div>
+
+</body>
+</html>

@@ -1,0 +1,65 @@
+//xlang Source, Name:Update.xcsm 
+//Date: Mon Sep 14:28:06 2019 
+
+class Update : HttpServlet{
+    Update(){
+        super(false, "/update\.x");
+    }
+    
+	void doGet(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+	}
+
+	void doPost(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+        String code = request.getSession("code");
+        String uname = request.getParam("user");
+        String upwd = request.getParam("pwd");
+        String newpwd = request.getParam("newpwd");
+        String codes = request.getParam("code");
+        
+        JsonObject root = new JsonObject();
+        int errCode = 0;
+        
+        if (codes != nilptr && code != nilptr){
+            if (codes.upper().equals(code.upper()) == false){
+                errCode = 2;
+            }
+        }else{
+            errCode = 1;
+        }
+        
+        if (errCode == 0 && uname != nilptr && upwd != nilptr && codes != nilptr && newpwd != nilptr){
+            errCode = -1;
+                        
+            Connection conn = Conn.get();
+            Sql.PreparedStatement state = nilptr;
+         
+            if (conn != nilptr){
+                try{
+                    state = conn.prepareStatement("update `admins` set `pwd` = ? where `user` = ? and `pwd` = ? limit 1");
+                    state.setValue(Utils.getMd5(newpwd));
+                    state.setValue(uname);
+                    state.setValue(Utils.getMd5(upwd));
+                    state.executeUpdate();
+                    errCode = 0;
+                }catch(Exception e){
+                    _system_.log("LOGIN",7,e.getMessage() + e.getErrorCode(),false);
+                }finally{
+                    Conn.release(conn);
+                    if (state != nilptr){
+                        state.close();
+                    }
+                }
+            }
+        }else
+        if (errCode == 0){
+            errCode = -1;
+        }
+        
+        root.put("error", errCode);
+        
+        response.print(root.toString(false));
+	}
+
+};

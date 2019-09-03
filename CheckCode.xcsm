@@ -1,0 +1,35 @@
+//xlang Source, Name:CheckCode.xcsm 
+//Date: Sat Aug 10:19:26 2019 
+
+class CheckCode : HttpServlet{
+    CheckCode(){
+        super(false, "/code\.bmp");
+    }
+    
+    static String randomString(int n){
+        byte [] table = "0123456789abcdefghijklmnopqrstuvwxyz".getBytes();
+        
+        byte [] code = new byte[n];
+        for (int i = 0; i < n ; i ++){
+            code[i] = table[(int)(Math.random() * table.length)];
+        }
+        return new String(code);
+    }
+	void doGet(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+        //for (int i =0; i < 10000; i ++)
+        { 
+            String code = randomString(4);
+            request.setSession("code",code);
+            VCodeGen gen = new VCodeGen(code, 140, 40);
+            byte [] data = gen.getData();
+            response.write(data, 0, data.length);
+        }
+	}
+
+	void doPost(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+	
+	}
+
+};

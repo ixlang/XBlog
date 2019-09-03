@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+<meta name="Description" content="Information architecture, Web Design, Web Standards." />
+<meta name="Keywords" content="your, keywords" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="Distribution" content="Global" />
+<meta name="Author" content="Erwin Aligam - ealigam@gmail.com" />
+<meta name="Robots" content="index,follow" />
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<link rel="stylesheet" href="images/HarvestField.css" type="text/css" />
+
+<title>修改密码</title></head>
+
+<body>
+<!-- wrap starts here -->
+<div id="wrap">
+
+	<!--header -->
+	<div id="header">			
+				
+		<h1 id="logo-text"><a href="index.html" title="">XLANG's<span> - blog</span></a></h1>		
+		<p id="slogan">http://blog.xlang.link</p>	
+			
+		<div id="header-links">
+			<p>
+				<a href="index.html">首页</a> | 
+				<a href="contact.html">联系</a> 			
+			</p>		
+		</div>				
+				
+	<!--header ends-->					
+	</div>
+
+	<!-- content-wrap starts -->
+	<div style="padding: 8px">
+
+		<div id="maineditor" style="width: 100%">
+				
+			<div id="article_content" style="height: 360px">
+				<div><h6 style="color: #fff">修改密码</h6></div>
+		        <form action="index.html" id="validate" class="form">
+		         
+		                <div class="formRow">
+		                    <label for="login" >用户名:</label>
+		                    <div class="loginInput"><input type="text" name="login" class="validate[required]" id="login" /></div>
+		                    <div class="clear"></div>
+		                </div>
+		                
+		                <div class="formRow">
+		                    <label for="pass">旧密码:</label>
+		                    <div class="loginInput"><input type="password" name="password" class="validate[required]" id="pass" /></div>
+		                    <div class="clear"></div>
+		                </div>
+		                <div class="formRow">
+		                    <label for="pass">新密码:</label>
+		                    <div class="loginInput"><input type="password" name="newpass" class="validate[required]" id="newpass" /></div>
+		                    <div class="clear"></div>
+		                </div>
+		                <div class="formRow">
+		                    <label for="pass">密码确认:</label>
+		                    <div class="loginInput"><input type="password" name="renewpass" class="validate[required]" id="renewpass" /></div>
+		                    <div class="clear"></div>
+		                </div>
+		                <div class="formRow">
+		                    <label for="pass">验证码:</label>
+		                    <div class="loginInput"><input type="text" maxlength="4" style="height: 26px;width:72px;float:left" class="validate[required]" id="verify" /> 
+		                    <img src="code.bmp" style="cursor:pointer; padding-left:10px;height: 20px; width: 60px;" onclick="this.src='code.bmp?' + Math.random();" alt="点击刷新"  id="verfimg"/></div>
+		                    <div class="clear"></div>
+		                </div> 
+		                
+		                <div class="loginControl">
+		                    <!-- <div class="rememberMe"><input type="checkbox" id="remMe" name="remMe" /><label for="remMe">Remember me</label></div> -->
+		                    <input type="button" value="更新密码" style="width: 80px;" id="enter" class="dredB logMeIn" onclick="login_user()"/>
+		                    <div class="clear"></div>
+		                </div>
+		                <script type="text/javascript">
+
+		                function trimStr(str){return str.replace(/(^\s*)|(\s*$)/g,"");}
+		                function login_user(){
+		                	if ((trimStr(login.value).length == 0) || (trimStr(pass.value).length == 0) || (trimStr(verify.value).length != 4) || (trimStr(newpass.value).length < 6)){
+		                		alert('请检查所需字段是否填写完整,密码不可小于6位.');
+		                		return ;
+		                	}
+		                	if ((trimStr(newpass.value) != trimStr(renewpass.value))){
+		                		alert('两次密码输入不相同.');
+		                		return ;
+		                	}
+			        		var content = {
+			        				'user' : login.value,
+			        				'pwd' : pass.value,
+			        				'newpwd' : newpass.value,
+			        				'code' : verify.value,
+			        		};
+			                $.ajax({
+			        			type: "POST",
+			        			url: "update.x",
+			        			dataType: "json", //表示返回值类型，不必须
+			        			data: content,
+			        			success: function (jsonResult) {
+			        				if (jsonResult.hasOwnProperty('error')) {
+			        					if (jsonResult.error == 0) {
+			        						window.location = 'index.html';
+			        					} else {
+			        						if (jsonResult.error == 1){
+			        							alert('登录失败，请检查用户名密码.');
+			        						}else
+			        						if (jsonResult.error == 2){
+			        							alert('验证码输入不正确.');
+			        						}
+			        						verfimg.src='code.bmp?' + Math.random();
+			        					}
+			        				}
+			        			}
+			        		});
+			                return false;
+		                }
+		      
+		                document.onkeydown = function(event) {   
+		                    if(event.keyCode == 13) {   
+		                        document.getElementById("enter").click();   
+		                        return false;   
+		                    }   
+		                }   
+		                
+		                </script>
+		        </form>
+
+			</div>			
+		<!-- main ends -->	
+		</div>
+	<!-- content-wrap ends-->	
+	</div>
+	
+	<!-- column starts -->		
+	
+
+
+	<!-- footer starts -->
+	<div id="footer">				
+		<p>	&copy; Cadaqs 2019 <strong>xlang2.7</strong> </p>
+	<!-- footer ends -->		
+	</div>	
+
+<!-- wrap ends here -->
+</div>
+
+</body>
+</html>

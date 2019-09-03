@@ -1,0 +1,147 @@
+//xlang 
+package System{
+	class out{
+		static int println(String text){
+			return _system_.consoleWrite(text + "\n");
+		}
+		static int print(String text){
+			return _system_.consoleWrite(text);
+		}
+	};
+	
+	class Console{
+		Console(){
+			_system_.createConsole();
+		}
+	};
+};
+
+using { 
+    System; 
+    Sql; 
+    XCImg; 
+    FileStream; 
+    FileSystem;
+};
+
+class XBlog{
+
+    static const String SERVER_NAME = "xlang_blog";
+    
+    static int main(String [] args){
+        if (args.length == 2) {
+            String cmdand = args[1];
+
+            //安装服务
+            if (cmdand.equals("install")) {
+                if (false == _system_.isServiceInstalled(SERVER_NAME)) {
+                    _system_.installService(_system_.getAppPath(), SERVER_NAME, "Xlang Web Server", "xlang web 服务");
+                }
+                return 0;
+            }
+
+            //卸载服务
+            if (cmdand.equals("uninstall")) {
+                if (true == _system_.isServiceInstalled(SERVER_NAME)) {
+                    _system_.uninstallService(SERVER_NAME);
+                }
+                return 0;
+            }
+
+            if (cmdand.equals("start")) {
+                String apppath = _system_.getAppPath();
+                String []_args = {apppath};
+                Process p = new Process(apppath, _args);
+                p.create(true,true,true,true);
+            }
+            
+            String apppath = _system_.getAppPath();
+            String []_args = {apppath};
+            Process p = new Process(apppath, _args);
+            p.create(true,false,false,false);
+            return 0;
+        }
+
+        _system_.registryCrashHandler(new ICrashHandler() {
+            void onCrash(String message)override {
+                _system_.log(SERVER_NAME,_system_.LOG_LEV_ERR,message,true);
+            }
+        });
+
+        return http_server();
+    }
+
+
+    static int http_server(){
+        
+        // 线程池读取配置
+        Conn.reloadConf();
+        
+        VCodeGen.load();
+        
+        Mysql.registry();
+        /** #################################################################################*/
+        /** 创建web站点*/
+        Website wb = new Website();
+        
+        /** 设置站点的静态文件目录为程序目录向上两层下的wwwroot文件夹  
+        @caution 注意修改为自定义目录 */
+        
+        String root_path = String.formatPath(XPlatform.getAppDirectory().appendPath("wwwroot"), false);
+        
+        wb.setRootDirectory(root_path);
+        
+        /** 设置站点的临时目录为temp, 用于网站缓存上传的数据流
+            注意:处理了onPostStream的servlet中不会保存临时文件，将回调onPostStream
+        */
+        wb.setTempDirectory(root_path.appendPath("temp"));
+        
+        /** 开启设置静态文件缓存， 单个文件大小上限为1M， 整个网站缓存上限为100M*/
+        //上线前要开启  调试时关掉
+        wb.configCacher(true,1024*1024,100*1024*1024);
+        
+        /** 注册servlet处理动态事务*/
+        wb.configSession(10000,120000);
+        
+        wb.registryServlet(new install()); 
+        wb.registryServlet(new ListArticle()); 
+        wb.registryServlet(new CheckCode());
+        wb.registryServlet(new Login());
+        wb.registryServlet(new PostArticle());
+        wb.registryServlet(new GetCategories()); 
+        wb.registryServlet(new PostComment());
+        wb.registryServlet(new Update());
+        
+        //上传接口
+        wb.registryServlet(new Upload(root_path));
+        /** 设置站点的默认首页， 多个用分号分割*/
+        wb.addDefaultPage("index.html");
+        /** #################################################################################*/
+        /** 创建http服务器*/
+        HttpServer server = new HttpServer();
+        /** 设置服务器的线程池大小为 4个*/
+        server.setThreadPoolSize(4);
+        /** 将站点添加到服务器中,参数1为IP或者域名,多个用分号分割*/
+        server.addWebsite("*;127.0.0.1;localhost", wb);
+        
+        Conn.init();
+        
+        /** 开启服务器, 模式为默认模式，可选为POLL EPOLL SELECT， 端口8889*/
+
+        if (server.startServer(HttpServer.SELECT_MODEL,8889)){ 
+            /** #################################################################################*/
+            System.out.println("start server success!\nopen URL with Webbrowser:\nhttp://localhost:8889/\nhttp://localhost:8889/api/?name=xlanguser\nhttp://localhost:8889/api/");
+        }else{
+            /** #################################################################################*/
+            System.out.println("start server filed! please check port(8889) occupancy!");
+        }
+        
+        if (0 == _system_.serviceRun(SERVER_NAME)){
+            Thread.sleep(-1);
+        }
+
+        return 0;
+    }
+ 
+};
+

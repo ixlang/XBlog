@@ -1,0 +1,140 @@
+//xlang Source, Name:install.xcsm 
+//Date: Thu Aug 13:54:19 2019 
+
+class install : HttpServlet{
+    
+	install() {//构造
+		super(false, "/install\.html");
+	}
+    static String CONF_PATH = XPlatform.getAppDirectory().appendPath("db.conf");
+    
+	void doGet(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+        
+        String dbuser = request.getParam("dbuser");
+        String dbpwd = request.getParam("dbpwd");
+        
+        String user = request.getParam("user");
+        String pwd = request.getParam("pwd");
+        
+        JsonObject root = new JsonObject();
+        int error = -1;
+        
+        if (isInstalled() == false && user != nilptr && pwd != nilptr && dbuser != nilptr && dbpwd != nilptr){
+             
+            Sql.Connection conn = nilptr;
+            
+            try{
+                conn = Sql.Database.getConnection("mysql");
+                
+                if (conn != nilptr){
+                    error = 1;
+                    conn.create(Conn.MYSQL_HOST, dbuser, dbpwd);
+                    error = -2;
+                    conn.setOption(Mysql.MysqlOption.CHARSET,"utf8");
+                    //
+                    
+                    
+                    Sql.Statement stmt = conn.createStatement();
+                    
+                    /*try{
+                        stmt.executeUpdate("DROP DATABASE xblog");
+                    }catch(Exception e){
+                        
+                    }*/
+                    int ret = stmt.executeUpdate("CREATE DATABASE xblog");
+                    conn.setOption(Mysql.MysqlOption.SELECTDB, Conn.MYSQL_DBNAME);
+                    
+                    ret = stmt.executeUpdate(
+                            "CREATE table `xblog`(" + 
+                            "`id` int unsigned not null auto_increment," + 
+                            "`uid` int unsigned not null," + 
+                            "`flag` int unsigned not null," + 
+                            "`category` varchar(32) not null," + 
+                            "`categoryid` int unsigned not null," + 
+                            "`name` varchar(32) not null," + 
+                            "`content` MEDIUMTEXT not null," + 
+                            "`visit` int unsigned not null," + 
+                            "`comment` int unsigned not null," + 
+                            "`posttime` datetime not null," + 
+                            "primary key (`id`)) CHARSET=utf8");
+                            
+                    ret = stmt.executeUpdate(
+                            "CREATE table `comment`(" + 
+                            "`id` int unsigned not null auto_increment," + 
+                            "`aid` int unsigned not null," + 
+                            "`name` varchar(32) not null," + 
+                            "`flag` int unsigned not null," + 
+                            "`email` varchar(32) not null," + 
+                            "`content` varchar(1024) not null," +
+                            "`posttime` datetime not null," + 
+                            "primary key (`id`)) CHARSET=utf8");
+                    
+                    ret = stmt.executeUpdate(
+                            "CREATE table `admins`(" + 
+                            "`id` int unsigned not null auto_increment," + 
+                            "`user` varchar(32) not null," + 
+                            "`pwd` varchar(32) not null," + 
+                            "`nick` varchar(32) not null default 'Admin'," + 
+                            "primary key (`id`)) CHARSET=utf8");
+                            
+                    ret = stmt.executeUpdate(
+                            "CREATE table `categories`(" + 
+                            "`id` int unsigned not null auto_increment," + 
+                            "`name` varchar(32) not null," + 
+                            "primary key (`id`)) CHARSET=utf8");
+                            
+                    Sql.PreparedStatement pstat  = conn.prepareStatement("insert into `admins` (`user`, `pwd`)values(?, ?)");
+                    
+                    pstat.setValue(user);
+                    pstat.setValue(Utils.getMd5(pwd));
+                    pstat.execute();
+                    
+                    saveConf(dbuser, dbpwd);
+                    Conn.reloadConf();
+                    error = 0;
+                }
+                
+            }catch(Exception e){
+                root.put("errinfo","error:" + e.getErrorCode() + " :  " + e.getMessage());
+                _system_.output("error:" + e.getErrorCode() + " :  " + e.getMessage() );
+            }finally{
+                if (conn != nilptr){
+                    conn.close();
+                }
+            }
+        }
+        
+        root.put("error", error);
+        response.print(root.toString(false));
+	}
+
+    static void saveConf(String usr, String pwd){
+        JsonObject jroot = new JsonObject();
+        jroot.put("usr", usr);
+        jroot.put("pwd", pwd);
+        
+        FileOutputStream fos = new FileOutputStream(CONF_PATH);
+        byte [] data = jroot.toString(true).getBytes();
+        fos.write(data);
+        fos.close();
+    }
+    
+    static bool isInstalled(){
+        return XPlatform.existsSystemFile(CONF_PATH);
+    }
+    
+    static JsonObject readConf(){
+        FileInputStream fis = new FileInputStream(CONF_PATH);
+        byte [] data = fis.read();
+        String content = new String(data);
+        fis.close();
+        return new JsonObject(content);
+    }
+    
+	void doPost(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+        doGet(request,response );
+	}
+
+};

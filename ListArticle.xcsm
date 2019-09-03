@@ -1,0 +1,416 @@
+//xlang Source, Name:ListArticle.xcsm 
+//Date: Thu Aug 13:58:06 2019 
+
+class ListArticle : HttpServlet{
+    ListArticle() {//构造
+		super(false, "/getarticle\.html");
+	}
+    
+	void doGet(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+        String pages = request.getArg("page");
+        String category = request.getArg("category");
+        if (pages == nilptr){
+            getArticle(request, response);
+            return ;
+        }
+        
+        int page = 0;
+        if (pages != nilptr){
+            page = pages.parseInt();
+        }
+    
+        if (page < 0){
+            page = 0;
+        }
+        
+        String suid = request.getSession("id");
+        int user = 0;
+        
+        if (suid != nilptr){
+            user = suid.parseInt();
+        }
+        
+        JsonObject root = new JsonObject();
+        
+        Connection conn = Conn.get();
+        Sql.PreparedStatement state = nilptr;
+        Sql.ResultSet res = nilptr;
+        
+        if (conn != nilptr){
+        
+            try{
+                int categoryid = 0;
+                if (category == nilptr || category.length() == 0){ 
+                    if (user > 0){
+                        state = conn.prepareStatement("select * from `xblog` ORDER BY `id` DESC limit ? , ?");
+                    }else{
+                        state = conn.prepareStatement("select * from `xblog` where (`flag` & 1 = 0) ORDER BY `id` DESC limit ? , ?");
+                    }
+                    
+                    state.setValue(page * 10);
+                    state.setValue(10);
+                }else{
+                    if (user > 0){
+                        state = conn.prepareStatement("select * from `xblog` where `categoryid` = ? ORDER BY `id` DESC limit ? , ?");
+                    }else{
+                        state = conn.prepareStatement("select * from `xblog` where `categoryid` = ? and (`flag` & 1 = 0) ORDER BY `id` DESC limit ? , ?");
+                    }
+                    categoryid = category.parseInt();
+                    state.setValue(categoryid);
+                    state.setValue(page * 10);
+                    state.setValue(10);
+                }
+                
+                res = state.executeQuery();
+                
+                root.put("error", 0);
+                JsonArray jarray = new JsonArray();
+                
+                while (res.next()){
+                    JsonObject doc = new JsonObject();
+                    int id = res.getInt("id");
+                    int uid = res.getInt("uid");
+                    int flag = res.getInt("flag");
+                    int visit = res.getInt("visit");
+                    int comment = res.getInt("comment");
+                    String name = res.getString("name");
+                    String strcategory = res.getString("category");
+                    String content = res.getString("content");
+                    String timestamp = res.getString("posttime");
+                    
+                    doc.put("id", id);
+                    doc.put("uid", uid);
+                    doc.put("flag", flag);
+                    doc.put("name", name);
+                    doc.put("category", strcategory);
+                    doc.put("visit", visit);
+                    doc.put("comment", comment);
+                    doc.put("date", timestamp);
+                    doc.put("content", content);
+                    jarray.put(doc);
+                }
+                
+                root.put("data", jarray);
+                root.put("page", page);
+                root.put("category", categoryid);
+                root.put("count",countArticle(categoryid, user));
+                
+            }catch(Exception e){
+            
+                _system_.log("GETART",7,e.getMessage(),false);
+                
+            }finally{
+                Conn.release(conn);
+                
+                if (state != nilptr){
+                    state.close();
+                }
+                
+                if (res != nilptr){
+                    res.close();
+                }
+            }
+        }else{
+            root.put("error", -1);
+        }
+        
+        response.print(root.toString(false));
+	}
+    
+    int countArticle(int category, int user){
+        Connection conn = Conn.get();
+        Sql.PreparedStatement state = nilptr;
+        Sql.ResultSet res = nilptr;
+        
+        if (conn != nilptr){
+            try{
+                if (category <= 0){ 
+                    if (user > 0){
+                        state = conn.prepareStatement("select count(*) from `xblog` ");
+                    }else{
+                        state = conn.prepareStatement("select count(*) from `xblog` where (`flag` & 1 = 0) ");
+                    }
+                }else{
+                    if (user > 0){
+                        state = conn.prepareStatement("select count(*) from `xblog` where `categoryid` = ? ");
+                    }else{
+                        state = conn.prepareStatement("select count(*) from `xblog` where `categoryid` = ? and (`flag` & 1 = 0) ");
+                    }
+                    state.setValue(category);
+                }
+                
+                res = state.executeQuery();
+                
+                if (res.next()){
+                    return res.getInt(0);
+                }                
+            }catch(Exception e){
+              
+              
+            }finally{
+                Conn.release(conn);
+                if (state != nilptr){
+                    state.close();
+                }
+                if (res != nilptr){
+                    res.close();
+                }
+            }
+        }
+        return 0;
+    }
+    
+    JsonObject getArtInfo(bool badmin, int actid, int categoryid, bool prev){
+        Connection conn = Conn.get();
+        Sql.PreparedStatement state = nilptr;
+        Sql.ResultSet res = nilptr;
+        JsonObject root;
+        if (conn != nilptr){
+            try{
+                if (badmin){
+                    if (prev){
+                        state = conn.prepareStatement("select * from `xblog` where `id` < ? " + ((categoryid > 0) ? " and `categoryid` = ? " : "") + " order by id desc limit 1");
+                    }else{
+                        state = conn.prepareStatement("select * from `xblog` where `id` > ? " + ((categoryid > 0) ? " and `categoryid` = ? " : "") + " order by id asc limit 1");
+                    }
+                    
+                }else{
+                    if (prev){
+                        state = conn.prepareStatement("select * from `xblog` where `id` < ? and (`flag` & 1 = 0) " + ((categoryid > 0) ? " and `categoryid` = ? " : "") + " order by id desc limit 1");
+                    }else{
+                        state = conn.prepareStatement("select * from `xblog` where `id` > ? and (`flag` & 1 = 0) " + ((categoryid > 0) ? " and `categoryid` = ? " : "") + " order by id asc limit 1");
+                    }
+                }
+ 
+                state.setValue(actid);
+                if (categoryid > 0){
+                    state.setValue(categoryid);
+                }
+                res = state.executeQuery();
+                
+
+                if (res.next()){
+                    JsonObject doc = new JsonObject();
+                    int id = res.getInt("id");
+                    String name = res.getString("name");
+                    root = new JsonObject();
+                    root.put("id", id);
+                    root.put("name", name);
+                }
+            }catch(Exception e){
+                _system_.log("GETART",7,e.getMessage(),false);
+            }finally{
+                Conn.release(conn);
+                if (state != nilptr){
+                    state.close();
+                }
+                if (res != nilptr){
+                    res.close();
+                }
+            }
+        }
+        return root;
+    }
+    
+    void getArticle(HttpServletRequest request, HttpServletResponse response){
+		//TODO:	
+        bool editable = false;
+        String suid = request.getSession("id");
+        if (suid != nilptr){
+            if (suid.parseInt() > 0){
+                editable = true;
+            }
+        }
+        String stractid = request.getArg("id");
+        int actid = 0;
+        if (stractid != nilptr){
+            actid = stractid.parseInt();
+        }
+    
+        if (actid < 0){
+            actid = 0;
+        }
+        
+        String strcategoryid = request.getArg("category");
+        int categoryid = 0;
+        if (strcategoryid != nilptr){
+            categoryid = strcategoryid.parseInt();
+        }
+    
+        if (categoryid < 0){
+            categoryid = 0;
+        }
+        
+        JsonObject root = new JsonObject();
+        
+        Connection conn = Conn.get();
+        Sql.PreparedStatement state = nilptr;
+        Sql.ResultSet res = nilptr;
+        
+        if (conn != nilptr){
+            try{
+                if (editable){
+                    state = conn.prepareStatement("select * from `xblog` where `id` = ? limit 1");
+                }else{
+                    state = conn.prepareStatement("select * from `xblog` where `id` = ? and (`flag` & 1 = 0) limit 1");
+                }
+                
+                state.setValue(actid);
+                
+                res = state.executeQuery();
+                
+                root.put("error", 0);
+                JsonArray jarray = new JsonArray();
+                
+                if (res.next()){
+                    JsonObject doc = new JsonObject();
+                    int id = res.getInt("id");
+                    int uid = res.getInt("uid");
+                    int flag = res.getInt("flag");
+                    int visit = res.getInt("visit");
+                    int comment = res.getInt("comment");
+                    String name = res.getString("name");
+                    String category = res.getString("category");
+                    String content = res.getString("content");
+                    String timestamp = res.getString("posttime");
+                    
+                    doc.put("id", id);
+                    doc.put("uid", uid);
+                    doc.put("flag", flag);
+                    doc.put("name", name);
+                    doc.put("visit", visit);
+                    doc.put("comment", comment);
+                    doc.put("category", category);
+                    doc.put("date", timestamp);
+                    doc.put("content", content);
+                    doc.put("editable", editable);
+                    
+                    getComments(doc, actid);
+                    jarray.put(doc);
+                    
+                    state.executeUpdate("update `xblog` set `visit` = `visit` + 1 where id = " + actid + " limit 1");
+                }
+                root.put("data", jarray);
+                
+                JsonObject prev = getArtInfo(editable, actid, categoryid, true);
+                JsonObject next = getArtInfo(editable, actid, categoryid, false);
+                
+                if (prev != nilptr){
+                    root.put("prev",prev);
+                }
+                if (next != nilptr){
+                    root.put("next",next);
+                }
+            }catch(Exception e){
+                _system_.log("GETART",7,e.getMessage(),false);
+            }finally{
+                Conn.release(conn);
+                if (state != nilptr){
+                    state.close();
+                }
+                if (res != nilptr){
+                    res.close();
+                }
+            }
+        }else{
+            root.put("error", -1);
+        }
+        response.print(root.toString(false));
+	}
+    
+    void getComments(JsonObject root, int actid){
+                
+        Connection conn = Conn.get();
+        Sql.PreparedStatement state = nilptr;
+        Sql.ResultSet res = nilptr;
+        
+        if (conn != nilptr){
+            try{
+                state = conn.prepareStatement("select * from `comment` where `aid` = ?");
+                state.setValue(actid);
+                
+                res = state.executeQuery();
+                
+                root.put("error", 0);
+                JsonArray jarray = new JsonArray();
+                
+                while (res.next()){
+                    JsonObject doc = new JsonObject();
+                    int id = res.getInt("id");
+                    int flag = res.getInt("flag");
+                    String name = res.getString("name");
+                    String content = res.getString("content");
+                    String timestamp = res.getString("posttime");
+                    
+                    doc.put("id", id);
+                    doc.put("flag", flag);
+                    doc.put("name", name);
+                    doc.put("date", timestamp);
+                    doc.put("content", content);
+                    jarray.put(doc);
+                }
+                root.put("comments", jarray);
+            }catch(Exception e){
+                _system_.log("GETART",7,e.getMessage(),false);
+            }finally{
+                Conn.release(conn);
+                if (state != nilptr){
+                    state.close();
+                }
+                if (res != nilptr){
+                    res.close();
+                }
+            }
+        }
+	}
+    
+	void doPost(HttpServletRequest request, HttpServletResponse response) override {
+		String uid = request.getSession("id");
+        int error = -1;
+        int lastid = 0;
+        
+        if (uid != nilptr){
+            int user = uid.parseInt();
+            if (user > 0){
+                String option = request.getParam("option");
+                String id = request.getParam("id");
+                if (option != nilptr && id != nilptr){
+                    int actid = id.parseInt();
+                    
+                    if (option.equals("remove")){
+                        PreparedStatement state;
+                        Connection conn;
+                        
+                        try{ 
+                            conn = Conn.get();
+                            if (conn != nilptr){
+                                state = conn.prepareStatement("delete from `xblog` where `id` = ? limit 1");
+                                state.setValue(actid);
+                                state.executeUpdate();
+                                error = 0;
+                                state.executeUpdate("delete from `comment` where `aid` = " + actid);
+                            }
+                        }catch(SqlException e){
+                            error = -2;
+                        }catch(Exception e){
+                            error = -1;
+                        }finally{
+                            if (state != nilptr){
+                                state.close();
+                            }
+                            if (conn != nilptr){
+                                Conn.release(conn);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        JsonObject root = new JsonObject();
+        root.put("id", lastid);
+        root.put("error", error);
+        response.print(root.toString(false));
+	}
+};

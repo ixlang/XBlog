@@ -1,0 +1,98 @@
+//xlang Source, Name:PostArticle.xcsm 
+//Date: Mon Aug 11:36:45 2019 
+
+class PostArticle : HttpServlet{
+    PostArticle(){
+        super(false, "/postarticle\.html");
+    }
+    
+	void doGet(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+	
+	}
+
+	void doPost(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+        String uid = request.getSession("id");
+        int error = -1;
+        int lastid = 0;
+        
+        if (uid != nilptr){
+            int user = uid.parseInt();
+            if (user > 0){
+                ResultSet res;
+                Connection conn;
+                PreparedStatement state;
+                
+                try{ 
+                    String artid = request.getParam("id");
+                    String title = request.getParam("title");
+                    String category = request.getParam("category");
+                    String categoryid = request.getParam("categoryid");
+                    String content = request.getParam("content");
+                    String flag = request.getParam("flags");
+                        
+                    
+                    if (title != nilptr && category != nilptr && categoryid != nilptr && content != nilptr && flag != nilptr){
+                        int acid = 0;
+                        if (artid != nilptr){
+                            acid = artid.parseInt();
+                        }
+                        conn = Conn.get();
+                        if (conn != nilptr){
+                            if (acid == 0){
+                                state = conn.prepareStatement("insert into `xblog` (`uid`, `flag`, `name`, `content`,`category`, `categoryid`, `visit`, `comment`, `posttime`)VALUES(?, ?, ?, ?, ?, ?, 0, 0, NOW())");
+                                state.setValue(user);
+                                state.setValue(flag.parseInt());
+                                state.setValue(title);
+                                state.setValue(content);
+                                state.setValue(category);
+                                state.setValue(categoryid.parseInt());
+                                state.execute();
+                                
+                                res = state.executeQuery("SELECT LAST_INSERT_ID()");
+                                if (res.next()){
+                                    lastid = res.getInt(0);
+                                    error = 0;
+                                }
+                            }else{
+                                state = conn.prepareStatement("update `xblog` set `uid` = ?, `flag` = ?, `name` = ?, `content` = ?, `category` = ?, `categoryid`  = ? where id = ?");
+                                state.setValue(user);
+                                state.setValue(flag.parseInt());
+                                state.setValue(title);
+                                state.setValue(content);
+                                state.setValue(category);
+                                state.setValue(categoryid.parseInt());
+                                state.setValue(acid);
+                                state.execute();
+                                error = 0;
+                                lastid = acid;
+                            }
+                        }
+                    }
+                }catch(SqlException e){
+                    error = -2;
+                    _system_.log("PostArticle",7,e.getMessage(),false);
+                }catch(Exception e){
+                    error = -1;
+                    _system_.log("PostArticle",7,e.getMessage(),false);
+                }finally{
+                    if (res != nilptr){
+                        res.close();
+                    }
+                    if (state != nilptr){
+                        state.close();
+                    }
+                    if (conn != nilptr){
+                        Conn.release(conn);
+                    }
+                }
+            }
+        }
+        
+        JsonObject root = new JsonObject();
+        root.put("id", lastid);
+        root.put("error", error);
+        response.print(root.toString(false));
+	}
+};

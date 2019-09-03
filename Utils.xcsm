@@ -1,0 +1,28 @@
+//xlang Source, Name:Utils.xcsm 
+//Date: Mon Sep 13:52:19 2019 
+
+class Utils{
+
+    // 对字符串进行MD5加密
+    
+    static String getMd5(String ori){
+    
+        ori = ori.upper();
+        long hmd5 = Crypto.Md5Init();
+        byte [] data = ori.getBytes();
+        
+        Crypto.Md5Update(hmd5,data,0,data.length);
+        Crypto.MD5Final(hmd5);
+        
+        data = Crypto.MD5Get(hmd5);
+        Crypto.MD5Close(hmd5);
+        
+        String out = "";
+        
+        for (int i = 0; i < data.length; i++){
+            out = out + data[i];
+        }
+        
+        return out.upper();
+    }
+};

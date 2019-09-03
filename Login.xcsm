@@ -1,0 +1,96 @@
+//xlang Source, Name:Login.xcsm 
+//Date: Sat Aug 10:07:36 2019 
+
+class Login : HttpServlet{
+    Login(){
+        super(false, "/login\.html");
+    }
+    
+	void doGet(HttpServletRequest request, HttpServletResponse response) override {
+        //TODO:	
+	}
+
+    /** POST 请求登陆,管理员登陆 **/
+	void doPost(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+        
+        /**
+            getSession 获取会话服务端数据
+            getCookie 获取会话客户端数据
+            getParam 获取post数据
+            getArg 获取url地址参数
+        **/
+        
+        String code = request.getSession("code");
+        String uname = request.getParam("user");
+        String upwd = request.getParam("pwd");
+        String codes = request.getParam("code");
+        
+        JsonObject root = new JsonObject();
+        int errCode = 0;
+        
+        if (codes != nilptr && code != nilptr){
+            if (codes.upper().equals(code.upper()) == false){
+                errCode = 2;
+            }
+        }else{
+            errCode = 1;
+        }
+        
+        if (errCode == 0 && uname != nilptr && upwd != nilptr && codes != nilptr){
+            errCode = -1;
+            
+            /** 从连接池获取一个链接**/
+            Connection conn = Conn.get();
+            Sql.PreparedStatement state = nilptr;
+            Sql.ResultSet res = nilptr;
+            
+            if (conn != nilptr){
+                try{
+                    /** 注意需要用try 保护,sql执行出错会抛出异常 **/
+                    state = conn.prepareStatement("select * from `admins` where `user` = ? and `pwd` = ? limit 1");
+                    
+                    /** 设置两个问号的值, setValue方法会进行字符串安全性处理,所以无须担心构造不安全sql **/
+                    state.setValue(uname);
+                    state.setValue(Utils.getMd5(upwd));
+                    
+                    /** 执行查询**/
+                    res = state.executeQuery();
+                    
+                    /** 判断resultset中有没有返回值**/
+                    if (res.next()){
+                        String nick = res.getString("nick");
+                        root.put("nick", nick);
+                        request.setSession("id","" + res.getInt("id"));
+                        
+                        /** 本来做了个昵称字段  后来没用上**/
+                        request.setSession("nick",nick);
+                        errCode = 0;
+                    }else{
+                        errCode = 1;
+                    }
+                    
+                }catch(Exception e){
+                    _system_.log("LOGIN",7,e.getMessage() + e.getErrorCode(),false);
+                }finally{
+                    /*** 将连接池回收的操作放到finally中去， 不管有没有异常发生都能确保被连接池回收**/
+                    Conn.release(conn);
+                    if (state != nilptr){
+                        state.close();
+                    }
+                    if (res != nilptr){
+                        res.close();
+                    }
+                }
+            }
+        }else
+        if (errCode == 0){
+            errCode = -1;
+        }
+        
+        root.put("error", errCode);
+        
+        response.print(root.toString(false));
+	}
+
+};

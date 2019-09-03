@@ -1,0 +1,165 @@
+//xlang Source, Name:GetCategories.xcsm 
+//Date: Mon Aug 11:54:52 2019 
+
+class GetCategories : HttpServlet{
+    GetCategories(){
+        super(false, "/listcategories\.html");
+    }
+    
+	void doGet(HttpServletRequest request, HttpServletResponse response) override {
+        int error = -1;
+        JsonObject root = new JsonObject();
+        
+        ResultSet res;
+        Connection conn;
+        Statement state;
+        
+        String uid = request.getSession("id");
+        bool isAdmin = false;
+        if (uid != nilptr && uid.parseInt() > 0){
+            isAdmin = true;
+        }
+        try{ 
+            conn = Conn.get();
+            if (conn != nilptr){
+                state = conn.createStatement();
+                res = state.executeQuery("select * from `categories`");
+                
+                JsonArray jarray = new JsonArray();
+                
+                while (res.next()){
+                    int cid = res.getInt("id");
+                    String cname = res.getString("name");
+                    
+                    JsonObject jobj = new JsonObject();
+                    jobj.put("id", cid);
+                    jobj.put("name", cname);
+                    
+                    jarray.put(jobj);
+                }
+                
+                root.put("data",jarray);
+                root.put("admin",isAdmin);
+                error = 0;
+            }
+        }catch(SqlException e){
+            error = -2;
+            _system_.log("GetCategories",7,e.getMessage(),false);
+        }catch(Exception e){
+            error = -1;
+            _system_.log("GetCategories",7,e.getMessage(),false);
+        }finally{
+            if (res != nilptr){
+                res.close();
+            }
+            if (state != nilptr){
+                state.close();
+            }
+            if (conn != nilptr){
+                Conn.release(conn);
+            }
+        }
+        
+        root.put("error", error);
+        response.print(root.toString(false));
+	}
+
+	void doPost(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+        String uid = request.getSession("id");
+        int error = -1;
+        int lastid = 0;
+        
+        if (uid != nilptr){
+            int user = uid.parseInt();
+            if (user > 0){
+                String option = request.getParam("option");
+                
+                if (option != nilptr){ 
+                    if (option.equals("add")){ 
+                        String category = request.getParam("category");
+                        if (category != nilptr && category.length() > 0){
+                            ResultSet res;
+                            Connection conn;
+                            PreparedStatement state;
+                            
+                            try{ 
+                                conn = Conn.get();
+                                
+                                if (conn != nilptr){
+                                    state = conn.prepareStatement("insert into `categories` (`name`)VALUES(?)");
+                                    state.setValue(category);
+                                    state.execute();
+                                    
+                                    res = state.executeQuery("SELECT LAST_INSERT_ID()");
+                                    if (res.next()){
+                                        lastid = res.getInt(0);
+                                        error = 0;
+                                    }
+                                }
+                                
+                            }catch(SqlException e){
+                                error = -2;
+                                _system_.log("PostComment",7,e.getMessage(),false);
+                            }catch(Exception e){
+                                error = -1;
+                                _system_.log("PostComment",7,e.getMessage(),false);
+                            }finally{
+                                if (res != nilptr){
+                                    res.close();
+                                }
+                                if (state != nilptr){
+                                    state.close();
+                                }
+                                if (conn != nilptr){
+                                    Conn.release(conn);
+                                }
+                            }
+                        }
+                    }else
+                    if (option.equals("remove")){
+                        String category = request.getParam("category");
+                        int cateid = 0;
+                        
+                        if (category != nilptr && category.length() > 0){ 
+                            cateid = category.parseInt();
+                        }
+                        
+                        if (cateid > 0){
+                            Connection conn;
+                            PreparedStatement state;
+                                
+                            try{ 
+                                conn = Conn.get();
+                                if (conn != nilptr){
+                                    state = conn.prepareStatement("delete from `categories` where `id` = ? limit 1");
+                                    state.setValue(cateid);
+                                    state.executeUpdate();
+                                    error = 0;
+                                }
+                            }catch(SqlException e){
+                                error = -2;
+                            }catch(Exception e){
+                                error = -1;
+                            }finally{
+                                if (state != nilptr){
+                                    state.close();
+                                }
+                                if (conn != nilptr){
+                                    Conn.release(conn);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        JsonObject root = new JsonObject();
+        root.put("id", lastid);
+        root.put("error", error);
+        
+        response.print(root.toString(false));
+	}
+
+};

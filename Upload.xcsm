@@ -1,0 +1,57 @@
+//xlang Source, Name:Upload.xcsm 
+//Date: Fri Aug 20:54:05 2019 
+
+class Upload : HttpServlet{
+    String root_path = "";
+    Upload(String rootpath){
+        super(false, "/upload\.html");
+        root_path = rootpath;
+    }
+	void doGet(HttpServletRequest request, HttpServletResponse response) override {
+		//TODO:	
+        
+	}
+
+	void doPost(HttpServletRequest request, HttpServletResponse response) override {
+        String uid = request.getSession("id");
+       
+        if (uid != nilptr){
+        
+            /** 获取该SESSION对应的用户ID  如果没有用户ID  说明此session未执行登陆 则拒绝处理**/
+            int user = uid.parseInt();
+            if (user > 0){
+                /** 获取上传的临时文件路径,注意 临时文件名是独一无二的,
+                @caution 但该请求结束时 临时文件将被删除  所以需要在后面重命名文件  以免被清理掉*/
+                String  [] path = request.getLocalFilepath("file");
+                
+                /** 获取文件的名称 */
+                String  [] filename = request.getFileName("file");
+                
+                String host = request.getHeader("HOST");
+                Website wb = request.getWebsite();
+                
+                if (filename != nilptr && path != nilptr && path.length > 0){
+                    String locaPath = path[0];
+                    
+                    /** 获取文件的扩展名 */
+                    String ext = filename[0].findExtension();
+                    if (ext != nilptr){
+                    
+                        /*** 由于临时文件是没有扩展名的 所以加上扩展名 */
+                        String newname = locaPath.append(ext);
+                        
+                        /*** 重命名文件 **/
+                        _system_.rename(locaPath,newname);
+                        locaPath = newname;
+                    }
+                    
+                    /*** 将本地文件映射为网络url */
+                    String url = wb.mapServerPath(locaPath,host);
+                    
+                    /*** 输出文件的URL路径到响应缓冲 **/
+                    response.print(url);
+                }
+            }
+        }
+	}
+};
