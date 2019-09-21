@@ -17,7 +17,7 @@ class Conn{
             MYSQL_UNAME = conf.getString("usr");
             MYSQL_PASSWD = conf.getString("pwd");
         }catch(Exception e){
-            
+            _system_.log(XBlog.SERVER_NAME,_system_.LOG_LEV_ERR,"db.conf is invalid!"+ e.getMessage(),true);
         }
     }
     
@@ -38,6 +38,7 @@ class Conn{
                     }
                     
                 }catch(Exception e){
+                    _system_.log(XBlog.SERVER_NAME,_system_.LOG_LEV_ERR,"can not connect mysql :" + e.getMessage(),true);
                     if (conn != nilptr){
                         conn.close();
                     }

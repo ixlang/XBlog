@@ -10,22 +10,35 @@
 					"libpath":	["libs"]
 				},
 				"options":	"",
-				"cmd":	"$(Output)",
-				"args":	"$(Output)",
-				"workdir":	"$(ProjectDir)",
+				"libs":	["XPlatform_1.0.0.2.lix", "FileStream_1.0.0.4.lix", "FileSystem_1.0.0.3.lix", "Sql_1.0.0.2.lix", "XCImg_1.0.0.2.lix"],
+				"links":	[],
+				"depends":	[{
+						"name":	"Sql",
+						"version":	"1.0.0.2"
+					}, {
+						"name":	"XCImg",
+						"version":	"1.0.0.2"
+					}],
 				"wtype":	"-arch:x86_64",
 				"ostype":	"-xcross-linux",
 				"outname":	"$(ProjectName)$(Ext)",
 				"outpath":	"$(ProjectDir)/$(Arch)/$(Configure)",
 				"command":	"-ce",
 				"uaclevel":	"默认",
+				"cmd":	"$(Output)",
+				"args":	"$(Output)",
+				"workdir":	"$(ProjectDir)",
+				"prebuild":	"",
+				"preclean":	"",
+				"makebuild":	"",
+				"makeclean":	"",
+				"afterbuild":	"",
+				"afterclean":	"",
 				"ignorewarning":	"",
 				"compdest":	"",
 				"ignorewl":	"",
-				"debugable":	"-dbg",
-				"debugdatabase":	"",
-				"libs":	["Sql_1.0.0.0.lix", "XPlatform_1.0.0.2.lix", "FileStream_1.0.0.4.lix", "FileSystem_1.0.0.3.lix", "XCImg_1.0.0.1.lix"],
-				"links":	[]
+				"debugable":	"",
+				"debugdatabase":	""
 			},
 			"release":	{
 				"path":	{

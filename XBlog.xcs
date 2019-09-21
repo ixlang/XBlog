@@ -31,7 +31,7 @@ class XBlog{
     static int main(String [] args){
         if (args.length == 2) {
             String cmdand = args[1];
-
+            _system_.log(SERVER_NAME,_system_.LOG_LEV_ERR,"demon :" + cmdand,true);
             //安装服务
             if (cmdand.equals("install")) {
                 if (false == _system_.isServiceInstalled(SERVER_NAME)) {
@@ -49,17 +49,17 @@ class XBlog{
             }
 
             if (cmdand.equals("start")) {
+                
                 String apppath = _system_.getAppPath();
                 String []_args = {apppath};
                 Process p = new Process(apppath, _args);
                 p.create(true,true,true,true);
+                return 0;
             }
-            
-            String apppath = _system_.getAppPath();
-            String []_args = {apppath};
-            Process p = new Process(apppath, _args);
-            p.create(true,false,false,false);
+            _system_.log(SERVER_NAME,_system_.LOG_LEV_ERR,"unknow param:" + cmdand,true);
             return 0;
+        }else{
+            _system_.log(SERVER_NAME,_system_.LOG_LEV_ERR,"xlang blog start no param" ,true);
         }
 
         _system_.registryCrashHandler(new ICrashHandler() {
@@ -87,7 +87,7 @@ class XBlog{
         /** 设置站点的静态文件目录为程序目录向上两层下的wwwroot文件夹  
         @caution 注意修改为自定义目录 */
         
-        String root_path = String.formatPath(XPlatform.getAppDirectory().appendPath("wwwroot"), false);
+        String root_path = String.formatPath(/*_system_.getWorkDirector()*/ XPlatform.getAppDirectory().appendPath("wwwroot"), false);
         
         wb.setRootDirectory(root_path);
         
@@ -102,7 +102,17 @@ class XBlog{
         
         /** 注册servlet处理动态事务*/
         wb.configSession(10000,120000);
-        
+        wb.registryServlet(new HttpServlet(404){
+            	void doGet(HttpServletRequest request, HttpServletResponse response) override {
+                    response.addHeader("Location","index.html");
+                    response.setResponseCode(302);
+                }
+
+                /** POST 请求登陆,管理员登陆 **/
+                void doPost(HttpServletRequest request, HttpServletResponse response) override {
+                    doGet(request, response);
+                }
+        });
         wb.registryServlet(new install()); 
         wb.registryServlet(new ListArticle()); 
         wb.registryServlet(new CheckCode());
@@ -131,13 +141,17 @@ class XBlog{
         if (server.startServer(HttpServer.SELECT_MODEL,8889)){ 
             /** #################################################################################*/
             System.out.println("start server success!\nopen URL with Webbrowser:\nhttp://localhost:8889/\nhttp://localhost:8889/api/?name=xlanguser\nhttp://localhost:8889/api/");
+            _system_.log(SERVER_NAME,_system_.LOG_LEV_ERR,"xlang blog start server success!",true);
         }else{
             /** #################################################################################*/
             System.out.println("start server filed! please check port(8889) occupancy!");
+            _system_.log(SERVER_NAME,_system_.LOG_LEV_ERR,"xlang blog start server filed! please check port(8889) occupancy!",true);
         }
         
         if (0 == _system_.serviceRun(SERVER_NAME)){
             Thread.sleep(-1);
+        }else{
+            _system_.log(SERVER_NAME,_system_.LOG_LEV_ERR,"xlang blog serviceRun fatal",true);
         }
 
         return 0;
