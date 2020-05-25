@@ -2,8 +2,8 @@
 //Date: Tue Aug 02:45:02 2019 
 
 class PostComment : HttpServlet{
-    PostComment(){
-        super(false, "/comment\.html");
+    public PostComment(){
+        super(0, "/comment\.html");
     }
     
 	void doGet(HttpServletRequest request, HttpServletResponse response) override {

@@ -3,8 +3,8 @@
 
 class Upload : HttpServlet{
     String root_path = "";
-    Upload(String rootpath){
-        super(false, "/upload\.html");
+    public Upload(String rootpath){
+        super(0, "/upload\.html");
         root_path = rootpath;
     }
 	void doGet(HttpServletRequest request, HttpServletResponse response) override {

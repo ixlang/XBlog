@@ -2,8 +2,8 @@
 //Date: Sat Aug 10:19:26 2019 
 
 class CheckCode : HttpServlet{
-    CheckCode(){
-        super(false, "/code\.bmp");
+    public CheckCode(){
+        super(0, "/code\.bmp");
     }
     
     static String randomString(int n){

@@ -1,16 +1,16 @@
 //xlang 
 package System{
-	class out{
-		static int println(String text){
+	public class out{
+		public static int println(String text){
 			return _system_.consoleWrite(text + "\n");
 		}
-		static int print(String text){
+		public static int print(String text){
 			return _system_.consoleWrite(text);
 		}
 	};
 	
-	class Console{
-		Console(){
+	public class Console{
+		public Console(){
 			_system_.createConsole();
 		}
 	};
@@ -21,7 +21,6 @@ using {
     Sql; 
     XCImg; 
     FileStream; 
-    FileSystem;
 };
 
 class XBlog{
@@ -114,7 +113,7 @@ class XBlog{
     "u5iOIHKF5oZO/GYWOJ344U7OKV5c4HsEFosBGu3BDR+T3zRAejt0\n" + 
     "-----END RSA PRIVATE KEY-----\n";
       
-    static const String SERVER_NAME = "xlang_blog";
+    public static const String SERVER_NAME = "xlang_blog";
     
     static int main(String [] args){
         if (args.length == 2) {
@@ -137,11 +136,10 @@ class XBlog{
             }
 
             if (cmdand.equals("start")) {
-                
                 String apppath = _system_.getAppPath();
                 String []_args = {apppath};
                 Process p = new Process(apppath, _args);
-                p.create(true,true,true,true);
+                p.create(Process.Default);
                 return 0;
             }
             _system_.log(SERVER_NAME,_system_.LOG_LEV_ERR,"unknow param:" + cmdand,true);
@@ -164,8 +162,6 @@ class XBlog{
         
         // 线程池读取配置
         Conn.reloadConf();
-        
-        VCodeGen.load();
         
         Mysql.registry();
         /** #################################################################################*/

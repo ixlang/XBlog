@@ -2,8 +2,8 @@
 //Date: Mon Aug 11:54:52 2019 
 
 class GetCategories : HttpServlet{
-    GetCategories(){
-        super(false, "/listcategories\.html");
+    public GetCategories(){
+        super(0, "/listcategories\.html");
     }
     
 	void doGet(HttpServletRequest request, HttpServletResponse response) override {

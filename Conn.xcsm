@@ -2,16 +2,16 @@
 //Date: Thu Aug 13:58:46 2019 
 
 class Conn{
-    static String MYSQL_HOST = "127.0.0.1";
-    static String MYSQL_UNAME = "user";
-    static String MYSQL_PASSWD = "pwd";
-    static String MYSQL_DBNAME = "xblog";
+    public static String MYSQL_HOST = "127.0.0.1";
+    public static String MYSQL_UNAME = "user";
+    public static String MYSQL_PASSWD = "pwd";
+    public static String MYSQL_DBNAME = "xblog";
     
     //连接池
     static ConnectionPool pool = new ConnectionPool();
     
     //读取配置
-    static void reloadConf(){
+    public static void reloadConf(){
         try{
             JsonObject conf = install.readConf();
             MYSQL_UNAME = conf.getString("usr");
@@ -22,7 +22,7 @@ class Conn{
     }
     
     // 连接池初始化
-    static bool init(){
+    public static bool init(){
     
         //配置参数
         pool.config(new Sql.ConnPoolCallback(){
@@ -71,11 +71,11 @@ class Conn{
         return true;
     }
     
-    static Connection get(){
+    public static Connection get(){
         return pool.getConnector();
     }
     
-    static void release(Connection conn){
+    public static void release(Connection conn){
         pool.recycle(conn);
     }
 };

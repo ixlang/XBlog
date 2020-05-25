@@ -2,8 +2,8 @@
 //Date: Thu Aug 13:58:06 2019 
 
 class ListArticle : HttpServlet{
-    ListArticle() {//构造
-		super(false, "/getarticle\.html");
+    public ListArticle() {//构造
+		super(0, "/getarticle\.html");
 	}
     
 	void doGet(HttpServletRequest request, HttpServletResponse response) override {

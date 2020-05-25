@@ -2,8 +2,8 @@
 //Date: Sat Aug 10:07:36 2019 
 
 class Login : HttpServlet{
-    Login(){
-        super(false, "/login\.html");
+    public Login(){
+        super(0, "/login\.html");
     }
     
 	void doGet(HttpServletRequest request, HttpServletResponse response) override {

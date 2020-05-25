@@ -3,8 +3,8 @@
 
 class install : HttpServlet{
     
-	install() {//构造
-		super(false, "/install\.html");
+	public install() {//构造
+		super(0, "/install\.html");
 	}
     static String CONF_PATH = XPlatform.getAppDirectory().appendPath("db.conf");
     
@@ -109,7 +109,7 @@ class install : HttpServlet{
         response.print(root.toString(false));
 	}
 
-    static void saveConf(String usr, String pwd){
+    public static void saveConf(String usr, String pwd){
         JsonObject jroot = new JsonObject();
         jroot.put("usr", usr);
         jroot.put("pwd", pwd);
@@ -124,7 +124,7 @@ class install : HttpServlet{
         return XPlatform.existsSystemFile(CONF_PATH);
     }
     
-    static JsonObject readConf(){
+    public static JsonObject readConf(){
         FileInputStream fis = new FileInputStream(CONF_PATH);
         byte [] data = fis.read();
         String content = new String(data);

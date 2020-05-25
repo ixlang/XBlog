@@ -10,35 +10,48 @@
 					"libpath":	["libs"]
 				},
 				"options":	"",
-				"libs":	["XPlatform_1.0.0.2.lix", "FileStream_1.0.0.4.lix", "FileSystem_1.0.0.3.lix", "Sql_1.0.0.2.lix", "XCImg_1.0.0.2.lix"],
-				"links":	[],
-				"depends":	[{
-						"name":	"Sql",
-						"version":	"1.0.0.2"
-					}, {
-						"name":	"XCImg",
-						"version":	"1.0.0.2"
-					}],
+				"cmd":	"$(Output)",
+				"args":	"$(Output)",
+				"workdir":	"$(ProjectDir)",
 				"prebuild":	"",
 				"preclean":	"",
 				"makebuild":	"",
 				"makeclean":	"",
 				"afterbuild":	"",
 				"afterclean":	"",
+				"ignorewarning":	"",
+				"compdest":	"",
+				"ignorewl":	"",
+				"debugable":	"-dbg",
+				"debugdatabase":	"",
 				"wtype":	"-arch:x86_64",
 				"ostype":	"-xcross-linux",
+				"sstype":	"",
 				"outname":	"$(ProjectName)$(Ext)",
 				"outpath":	"$(ProjectDir)/$(Arch)/$(Configure)",
 				"command":	"-ce",
 				"uaclevel":	"默认",
-				"cmd":	"$(Output)",
-				"args":	"$(Output)",
-				"workdir":	"$(ProjectDir)",
-				"ignorewarning":	"",
-				"compdest":	"",
-				"ignorewl":	"",
-				"debugable":	"",
-				"debugdatabase":	""
+				"libs":	["XPlatform_1.0.0.3.lix", "XCImg_1.0.0.3.lix", "Sql_1.0.0.3.lix", "FileStream_1.0.0.6.lix"],
+				"links":	[],
+				"depends":	[{
+						"name":	"Sql",
+						"version":	"1.0.0.3"
+					}, {
+						"name":	"XCImg",
+						"version":	"1.0.0.3"
+					}, {
+						"name":	"XPlatform",
+						"version":	"1.0.0.3"
+					}, {
+						"name":	"XCImg",
+						"version":	"1.0.0.3"
+					}, {
+						"name":	"Sql",
+						"version":	"1.0.0.3"
+					}, {
+						"name":	"FileStream",
+						"version":	"1.0.0.6"
+					}]
 			},
 			"release":	{
 				"path":	{
@@ -60,7 +73,7 @@
 			}
 		},
 		"comment":	"编译项目时先引入如下包 \rXCImg\rSql\r\r使用菜单[工具]->[包管理]，选择后点击[添加到当前项目]",
-		"icofile":	"",
-		"versioninc":	"0"
+		"versioninc":	"0",
+		"icofile":	""
 	}
 }

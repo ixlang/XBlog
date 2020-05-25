@@ -2,8 +2,8 @@
 //Date: Mon Aug 11:36:45 2019 
 
 class PostArticle : HttpServlet{
-    PostArticle(){
-        super(false, "/postarticle\.html");
+    public PostArticle(){
+        super(0, "/postarticle\.html");
     }
     
 	void doGet(HttpServletRequest request, HttpServletResponse response) override {

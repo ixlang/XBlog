@@ -5,7 +5,7 @@ class Utils{
 
     // 对字符串进行MD5加密
     
-    static String getMd5(String ori){
+    public static String getMd5(String ori){
     
         ori = ori.upper();
         long hmd5 = Crypto.Md5Init();

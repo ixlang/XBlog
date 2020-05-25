@@ -2,8 +2,8 @@
 //Date: Mon Sep 14:28:06 2019 
 
 class Update : HttpServlet{
-    Update(){
-        super(false, "/update\.x");
+    public Update(){
+        super(0, "/update\.x");
     }
     
 	void doGet(HttpServletRequest request, HttpServletResponse response) override {
