@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="Description" content="xlang 程序设计语言 官方博客 提供在线 xlang 开发资料查阅和交流." />
+<meta name="Keywords" content="xlang 程序设计语言, 官方博客, xlang 帮助, xlang开发交流" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="Distribution" content="Global" />
+<meta name="Author" content="Cadaqs - cadaqs@live.com" />
+<meta name="Robots" content="index,all" />
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/web.js"></script>
+<script type="text/javascript" src="highlight/highlight.pack.js"></script>
+<link rel="stylesheet" type="text/css" href="highlight/styles/xstudio.css"/>
+<link rel="stylesheet" href="images/HarvestField.css" type="text/css" />
+
+<title>浏览文章</title></head>
+
+<body>
+<!-- wrap starts here -->
+<div id="wrap">
+
+	<!--header -->
+	<div id="header">			
+				
+		<h1 id="logo-text"><a href="index.html" title="">XLANG's<span> - blog</span></a></h1>		
+		<p id="slogan">https://blog.xlang.link</p>	
+			
+		<div id="header-links">
+			<p>
+				<a href="index.html">首页</a>	| 
+				<a href="contact.html">联系</a> 		
+			</p>		
+		</div>				
+				
+	<!--header ends-->					
+	</div>
+		
+	<!-- navigation starts-->	
+	<div id="nav">
+		<ul>
+			<li><a href="${PreArticle}" a id="prevttitle">${PreTitle}</a></li>
+			<li id="current"><a id="currenttitle">${Title}</a></li>
+			<li><a href="${PostArticle}" a id="nexttitle">${PostTitle}</a></li>		
+		</ul>
+	<!-- navigation ends-->	
+	</div>	
+		
+	<!-- content-wrap starts -->
+	<div id="content-art" style="background-color: #d6d6d6">
+
+		<div id="article_main" style="padding-top: 10px;">
+			
+			
+			<div id="article_content" style="background-color: #efefef; border:0px solid #a1a1a1;padding: 15px; margin: 10px;overflow-x: hidden;box-shadow: 0px 1px 15px 5px #808080;">
+				<a style="font-size: 14px;"> 文字大小: </a> 
+				<a style="font-size: 20px; cursor: pointer;" onclick="article_content.style.fontSize='20px'"> 大 </a> 
+				<a style="font-size: 14px; cursor: pointer;" onclick="article_content.style.fontSize='14px'"> 中 </a> 
+				<a style="font-size: 10px; cursor: pointer;" onclick="article_content.style.fontSize='10px'"> 小 </a>
+				<a id="removectl" style="font-size: 14px;float: right;margin: 15px; display: none;"> 删除 <img src="images/remove.png" style="padding: 0px;width: 12px; height: 12px;" /></a>
+				<a id="editctl" style="font-size: 14px;float: right;margin: 15px; display: none;"> 编辑 <img src="images/edit.png" style="padding: 0px;width: 12px; height: 12px;" /></a>
+				
+				<HR SIZE=1 ></HR>
+				<br/>
+				<h1 align="center" ><a id="arttitle"  style="color:#5691f9;text-decoration:none">${Title}</a></h1>
+				<h3 align="left" ><a id="artcategory"  style="color:#8baa22;text-decoration:none; float: left">${Category}</a><a id="artdate"  style="color:#999;text-decoration:none; float: right">${Timestamp}</a> </h3>
+				<br/><br/>
+				<DIV style="BORDER-TOP: #cccccc 1px dashed; OVERFLOW: hidden; HEIGHT: 1px"></DIV>
+				<br/>
+				${Content}
+				<br /><br /><br /><HR/><br />
+				<a href="${PreArticle}" a id="prevttitle">上一篇:${PreTitle}</a><a href="${PostArticle}" style="float:right;" a id="nexttitle">下一篇:${PostTitle}</a>	
+			</div>
+				<DIV style="BORDER-TOP: #ddd 1px dashed; OVERFLOW: hidden; HEIGHT: 1px"></DIV>
+			<div id="commentarea">
+				<h3>评论</h3>	
+									
+				<table id="tabcomment" style="width: 90%">
+					<tr>
+						<th class="first" style="width: 160px;">日期</th>
+						<th style="width: 100px;">网友</th>
+						<th>内容</th>
+					</tr>
+				</table>
+									
+				<h3>留下评论</h3>
+				<form action="#" style="box-shadow: 0px 1px 15px 5px #808080;width: 80%; overflow: hidden;">			
+				<p>			
+				<label>名称</label>
+				<input name="dname" id="dname" placeholder="网友名称" type="text" size="30" />
+				<input name="demail" id="demail" placeholder="电子邮件" type="text" size="30" />
+				<label>评论内容</label>
+				<textarea name="dcontent" id="dcontent" rows="5" cols="5" style="width: 100%"></textarea>
+
+				<label for="pass">验证码:</label>
+	            <input type="text" maxlength="4" style="height: 16px;width:72px;float:left" class="validate[required]" id="verify" /> 
+	            <img src="code.bmp" style="cursor:pointer; padding-left:10px;height: 10px; width: 60px;" onclick="this.src='code.bmp?' + Math.random();" alt="点击刷新"  id="verfimg"/>
+				<br />	
+				<label><input style="vertical-align:middle" type="checkbox" name="private" id="private" value="0">私有</label>
+				<input type="button" value="提交" style="width: 80px;" id="enter" class="dredB logMeIn" onclick="submit_comment()" />		
+				</p>		
+				</form>	
+			</div>			
+			<br />	
+			
+		<!-- main ends -->	
+		</div>
+	<!-- content-wrap ends-->	
+	</div>
+	
+	<!-- column starts -->		
+	<script type="text/javascript">
+		var actid = getArgs("id");
+		var catetid = getArgs("category");
+		if (actid == false){
+			actid = 0;
+		}
+		if (catetid == false){
+			catetid = 0;
+		}
+
+		${CommentData};
+
+		loadComment(${ArticleId}, cmtData);
+
+		function delete_article(cid){
+			if (confirm("你确认要删除此文章吗？")){
+				var content = {
+					'id' : cid,
+					'option' : "remove",
+				};
+
+				$.ajax({
+					type: "POST",
+					url: "getarticle.html",
+					dataType: "json", //表示返回值类型，不必须
+					data: content,
+					success: function (jsonResult) {
+						if (jsonResult.error == 0){
+							window.location = "index.html";
+						}else{
+							alert('删除失败.');
+	        				return ;
+						}
+					}
+				});
+			}
+		}
+
+		function loadComment(aid, data){
+			for (var b in data){
+				var b = data[b];
+				var NewRow = document.getElementById("tabcomment").insertRow();
+				NewRow.classList.add("row-b");
+
+				var c1 = NewRow.insertCell(0), c2 = NewRow.insertCell(1), c3 = NewRow.insertCell(2);
+				c1.innerHTML = b.date;				
+				c2.innerText = b.name;
+				c3.innerText = b.content;
+			}
+		}
+
+		function removeComment(cid, aid){
+			if (confirm("你确认要删除此留言吗？")){
+				var content = {
+					'id' : cid,
+					'aid' : aid,
+				};
+
+				$.ajax({
+					type: "GET",
+					url: "comment.html",
+					dataType: "json", //表示返回值类型，不必须
+					data: content,
+					success: function (jsonResult) {
+						if (jsonResult.error == 0){
+							window.location = window.location;
+						}else{
+							alert('删除失败.');
+						}
+					}
+				});
+			}
+		}
+
+        function trimStr(str){return str.replace(/(^\s*)|(\s*$)/g,"");}
+
+        function submit_comment(){
+        	if ((trimStr(dcontent.value).length == 0) || (trimStr(verify.value).length != 4)){
+        		alert('请检查所需字段是否填写完整.');
+        		return ;
+        	}
+        	
+    		var content = {
+				'name' : dname.value,
+				'art' : actid,
+				'email' : demail.value,
+				'content' : dcontent.value,
+				'code' : verify.value,
+				'flags' : private.checked == true ? 1 : 0,
+    		};
+
+            $.ajax({
+    			type: "POST",
+    			url: "comment.html",
+    			dataType: "json", //表示返回值类型，不必须
+    			data: content,
+    			success: function (jsonResult) {
+    				if (jsonResult.hasOwnProperty('error')) {
+    					if (jsonResult.error == 0) {
+    						window.location = 'article.html?id=' + actid;
+    					} else {
+    						alert('提交评论失败.');
+    						
+    					}
+    				}
+    			}
+    		});
+
+            return false;
+        }
+
+        document.onkeydown = function(event) {   
+            if(event.keyCode == 13) {   
+                document.getElementById("enter").click();   
+                return false;   
+            }   
+        }   
+        
+    </script>
+	<!-- footer starts <script></script> -->
+	<div id="footer">				
+		<p>	&copy; Cadaqs 2019 <strong>xlang2.7</strong> </p>
+	<!-- footer ends -->		
+	</div>	
+
+
+
+
+
+</div>
+
+</body>
+</html>

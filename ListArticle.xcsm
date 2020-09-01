@@ -161,7 +161,44 @@ class ListArticle : HttpServlet{
         return 0;
     }
     
-    JsonObject getArtInfo(bool badmin, int actid, int categoryid, bool prev){
+    public static int getNear(int actid, int categoryid, bool prev){
+        Connection conn = Conn.get();
+        Sql.PreparedStatement state = nilptr;
+        Sql.ResultSet res = nilptr;
+
+        if (conn != nilptr){
+            try{
+                if (prev){
+                    state = conn.prepareStatement("select * from `xblog` where `id` < ? and (`flag` & 1 = 0) " + ((categoryid > 0) ? " and `categoryid` = ? " : "") + " order by id desc limit 1");
+                }else{
+                    state = conn.prepareStatement("select * from `xblog` where `id` > ? and (`flag` & 1 = 0) " + ((categoryid > 0) ? " and `categoryid` = ? " : "") + " order by id asc limit 1");
+                }
+                state.setValue(actid);
+                if (categoryid > 0){
+                    state.setValue(categoryid);
+                }
+                res = state.executeQuery();
+                
+                if (res.next()){
+                    JsonObject doc = new JsonObject();
+                    return res.getInt("id");
+                }
+            }catch(Exception e){
+                _system_.log("GETART",7,e.getMessage(),false);
+            }finally{
+                Conn.release(conn);
+                if (state != nilptr){
+                    state.close();
+                }
+                if (res != nilptr){
+                    res.close();
+                }
+            }
+        }
+        return 0;
+    
+    }
+    public static JsonObject getArtInfo(bool badmin, int actid, int categoryid, bool prev){
         Connection conn = Conn.get();
         Sql.PreparedStatement state = nilptr;
         Sql.ResultSet res = nilptr;
@@ -213,40 +250,13 @@ class ListArticle : HttpServlet{
         return root;
     }
     
-    void getArticle(HttpServletRequest request, HttpServletResponse response){
-		//TODO:	
-        bool editable = false;
-        String suid = request.getSession("id");
-        if (suid != nilptr){
-            if (suid.parseInt() > 0){
-                editable = true;
-            }
-        }
-        String stractid = request.getArg("id");
-        int actid = 0;
-        if (stractid != nilptr){
-            actid = stractid.parseInt();
-        }
-    
-        if (actid < 0){
-            actid = 0;
-        }
-        
-        String strcategoryid = request.getArg("category");
-        int categoryid = 0;
-        if (strcategoryid != nilptr){
-            categoryid = strcategoryid.parseInt();
-        }
-    
-        if (categoryid < 0){
-            categoryid = 0;
-        }
-        
+    public static JsonObject readArticle(int actid, int categoryid, bool editable){
         JsonObject root = new JsonObject();
         
         Connection conn = Conn.get();
         Sql.PreparedStatement state = nilptr;
         Sql.ResultSet res = nilptr;
+        int error = -1;
         
         if (conn != nilptr){
             try{
@@ -260,7 +270,7 @@ class ListArticle : HttpServlet{
                 
                 res = state.executeQuery();
                 
-                root.put("error", 0);
+                
                 JsonArray jarray = new JsonArray();
                 
                 if (res.next()){
@@ -290,6 +300,9 @@ class ListArticle : HttpServlet{
                     jarray.put(doc);
                     
                     state.executeUpdate("update `xblog` set `visit` = `visit` + 1 where id = " + actid + " limit 1");
+                    error = 0;
+                }else{
+                    error = 1;
                 }
                 root.put("data", jarray);
                 
@@ -300,10 +313,11 @@ class ListArticle : HttpServlet{
                     root.put("prev",prev);
                 }
                 if (next != nilptr){
-                    root.put("next",next);
+                    root.put("post",next);
                 }
             }catch(Exception e){
                 _system_.log("GETART",7,e.getMessage(),false);
+                error = -2;
             }finally{
                 Conn.release(conn);
                 if (state != nilptr){
@@ -313,13 +327,48 @@ class ListArticle : HttpServlet{
                     res.close();
                 }
             }
-        }else{
-            root.put("error", -1);
         }
+        
+        root.put("error", error);
+        
+        return root;
+    }
+    
+    void getArticle(HttpServletRequest request, HttpServletResponse response){
+		//TODO:	
+        bool editable = false;
+        String suid = request.getSession("id");
+        if (suid != nilptr){
+            if (suid.parseInt() > 0){
+                editable = true;
+            }
+        }
+        String stractid = request.getArg("id");
+        int actid = 0;
+        if (stractid != nilptr){
+            actid = stractid.parseInt();
+        }
+    
+        if (actid < 0){
+            actid = 0;
+        }
+        
+        String strcategoryid = request.getArg("category");
+        int categoryid = 0;
+        if (strcategoryid != nilptr){
+            categoryid = strcategoryid.parseInt();
+        }
+    
+        if (categoryid < 0){
+            categoryid = 0;
+        }
+        
+        JsonObject root = readArticle(actid, categoryid, editable);
+        
         response.print(root.toString(false));
 	}
     
-    void getComments(JsonObject root, int actid){
+    static void getComments(JsonObject root, int actid){
                 
         Connection conn = Conn.get();
         Sql.PreparedStatement state = nilptr;
@@ -390,6 +439,8 @@ class ListArticle : HttpServlet{
                                 state.executeUpdate();
                                 error = 0;
                                 state.executeUpdate("delete from `comment` where `aid` = " + actid);
+                                
+                                ArticleCacher.refreshnear(actid);
                             }
                         }catch(SqlException e){
                             error = -2;

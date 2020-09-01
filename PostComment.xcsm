@@ -44,6 +44,8 @@ class PostComment : HttpServlet{
                         Conn.release(conn);
                     }
                 }
+                
+                ArticleCacher.makeCache(arid,nilptr,nilptr,0,0,true);
             }
         }
         
@@ -83,6 +85,7 @@ class PostComment : HttpServlet{
                             
                             state.executeUpdate("update `xblog` set `comment` = `comment` + 1 where id = " + art.parseInt() + " limit 1");
                             error = 0;
+                            ArticleCacher.makeCache(art.parseInt(),nilptr,nilptr,0,0,true);
                         }
                     }
                 }catch(SqlException e){

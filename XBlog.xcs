@@ -156,8 +156,17 @@ class XBlog{
 
         return http_server();
     }
-
-
+    
+    static String wwwroot = XPlatform.getAppDirectory().appendPath("wwwroot");
+    static bool bDebug = false;
+    
+    public static String getWwwroot(){
+        if (bDebug)
+        return _system_.getWorkDirector().appendPath("wwwroot");
+        
+        return wwwroot;
+    }
+    
     static int http_server(){
         
         // 线程池读取配置
@@ -171,7 +180,7 @@ class XBlog{
         /** 设置站点的静态文件目录为程序目录向上两层下的wwwroot文件夹  
         @caution 注意修改为自定义目录 */
         
-        String root_path = String.formatPath(/*_system_.getWorkDirector()*/ XPlatform.getAppDirectory().appendPath("wwwroot"), false);
+        String root_path = String.formatPath(getWwwroot(), false);
         
         wb.setRootDirectory(root_path);
         
@@ -182,13 +191,24 @@ class XBlog{
         
         /** 开启设置静态文件缓存， 单个文件大小上限为1M， 整个网站缓存上限为100M*/
         //上线前要开启  调试时关掉
-        wb.configCacher(true,1024*1024,100*1024*1024);
+        if (!bDebug){
+            wb.configCacher(true,1024*1024,100*1024*1024);
+        }
         
         /** 注册servlet处理动态事务*/
         wb.configSession(10000,120000);
         wb.registryServlet(new HttpServlet(404){
+                Pattern art_redir = new Pattern("/article_((\\d)+)\.html");
             	void doGet(HttpServletRequest request, HttpServletResponse response) override {
-                    response.addHeader("Location","index.html");
+                    String uri = request.getUrl();
+                    Pattern.Result res = art_redir.match(uri,Pattern.NOTEMPTY);
+                    int pl = res.length();
+                    if (res.length() > 0){
+                        Pattern.Result nid = res.get(0).get(1);
+                        response.addHeader("Location","article.html?id=" + uri.substring(nid.start(),nid.end()));
+                    }else{
+                        response.addHeader("Location","index.html");
+                    }
                     response.setResponseCode(302);
                 }
 
@@ -205,7 +225,8 @@ class XBlog{
         wb.registryServlet(new GetCategories()); 
         wb.registryServlet(new PostComment());
         wb.registryServlet(new Update());
-        
+        wb.registryServlet(new ArticleView());
+        wb.registryServlet(new WebsiteMap());
         //上传接口
         wb.registryServlet(new Upload(root_path));
         /** 设置站点的默认首页， 多个用分号分割*/

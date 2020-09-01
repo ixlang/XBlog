@@ -2,13 +2,15 @@
 //Date: Mon Aug 11:36:45 2019 
 
 class PostArticle : HttpServlet{
+    
     public PostArticle(){
         super(0, "/postarticle\.html");
     }
     
 	void doGet(HttpServletRequest request, HttpServletResponse response) override {
 		//TODO:	
-	
+        
+        
 	}
 
 	void doPost(HttpServletRequest request, HttpServletResponse response) override {
@@ -67,7 +69,9 @@ class PostArticle : HttpServlet{
                                 state.execute();
                                 error = 0;
                                 lastid = acid;
+                                ArticleCacher.makeCache(acid,nilptr,nilptr,0,0,true);
                             }
+                            ArticleCacher.refreshnear(lastid);
                         }
                     }
                 }catch(SqlException e){
@@ -95,4 +99,6 @@ class PostArticle : HttpServlet{
         root.put("error", error);
         response.print(root.toString(false));
 	}
+    
+    
 };
