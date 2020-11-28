@@ -44,6 +44,17 @@ class ArticleView : HttpServlet{
         }
 	}
     
+    String hexString(String text){
+        String out = "";
+        for (int i = 0; i < text.length(); i++){
+            out = out + "," + String.format("%d",text.charAt(i));
+        }
+        if (out.length() > 0){
+            return "[" + out.substring(1, out.length()) + "]";
+        }
+        return "[]";
+    }
+    
     void buildStaticPage(int artid, String title, String category, String content, String date,  JsonObject prev , JsonObject post, JsonArray comments, HttpServletResponse response){
         if (template == nilptr){
             return;
@@ -73,6 +84,9 @@ class ArticleView : HttpServlet{
         if (comments != nilptr){
             cmtData = comments.toString(false);
         }
+        
+        String cmtdata = hexString(cmtData);
+        
         String html_content = template.replace("${ArticleId}","" + artid)
             .replace("${Title}",title)
             .replace("${Content}",content)
@@ -82,7 +96,7 @@ class ArticleView : HttpServlet{
             .replace("${PreArticle}",prevHref)
             .replace("${PostTitle}",postTitle)
             .replace("${PostArticle}",postHref)
-            .replace("${CommentData}","var cmtData = " + cmtData);
+            .replace("${CommentData}","var cmtData = " + cmtdata);
             
         response.print(html_content);
         

@@ -62,7 +62,6 @@ class PostComment : HttpServlet{
         
         if (codes != nilptr && code != nilptr){
             if (codes.upper().equals(code.upper()) == true){
-                ResultSet res;
                 Connection conn;
                 PreparedStatement state;
                 
@@ -95,9 +94,6 @@ class PostComment : HttpServlet{
                     error = -1;
                     _system_.log("PostComment",7,e.getMessage(),false);
                 }finally{
-                    if (res != nilptr){
-                        res.close();
-                    }
                     if (state != nilptr){
                         state.close();
                     }
