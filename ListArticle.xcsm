@@ -250,6 +250,27 @@ class ListArticle : HttpServlet{
         return root;
     }
     
+    public static void incvisits(int actid){
+        Connection conn = Conn.get();
+        Sql.Statement state = nilptr;
+        
+        if (conn != nilptr){
+            try{
+                state = conn.createStatement();
+                if (state != nilptr){
+                    state.executeUpdate("update `xblog` set `visit` = `visit` + 1 where id = " + actid + " limit 1");
+                }
+            }catch(Exception e){
+                
+            }finally{
+                Conn.release(conn);
+                if (state != nilptr){
+                    state.close();
+                }
+            }
+        }
+    }
+    
     public static JsonObject readArticle(int actid, int categoryid, bool editable){
         JsonObject root = new JsonObject();
         

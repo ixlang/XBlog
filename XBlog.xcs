@@ -103,7 +103,7 @@ class XBlog{
                 Pattern art_redir = new Pattern("/article_((\\d)+)\.html");
             	void doGet(HttpServletRequest request, HttpServletResponse response) override {
                     String uri = request.getUrl();
-                    Pattern.Result res = art_redir.match(uri,Pattern.NOTEMPTY);
+                    Pattern.Result res = art_redir.matchAll(uri, 0, -1, Pattern.NOTEMPTY);
                     int pl = res.length();
                     if (res.length() > 0){
                         Pattern.Result nid = res.get(0).get(1);

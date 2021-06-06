@@ -170,6 +170,7 @@ class ArticleView : HttpServlet{
                 response.print("can't display this article");
             }
         }else{
+            ListArticle.incvisits(actid);
             response.print(content);
         }
 	}

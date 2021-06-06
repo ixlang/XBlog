@@ -10,30 +10,30 @@
 					"libpath":	["libs"]
 				},
 				"options":	"",
-				"cmd":	"$(Output)",
-				"args":	"$(Output)",
-				"workdir":	"$(ProjectDir)",
 				"prebuild":	"",
 				"preclean":	"",
 				"makebuild":	"",
 				"makeclean":	"",
 				"afterbuild":	"",
 				"afterclean":	"",
-				"libs":	["FileStream_1.0.0.7.lix", "Sql_1.0.0.4.lix", "XCImg_1.0.0.4.lix", "XPlatform_1.0.0.4.lix"],
+				"libs":	["FileStream_1.0.0.8.lix", "XCImg_1.0.0.5.lix", "XPlatform_1.0.0.5.lix", "Sql_1.0.0.6.lix"],
 				"links":	[],
 				"depends":	[{
 						"name":	"FileStream",
-						"version":	"1.0.0.7"
-					}, {
-						"name":	"Sql",
-						"version":	"1.0.0.4"
+						"version":	"1.0.0.8"
 					}, {
 						"name":	"XCImg",
-						"version":	"1.0.0.4"
+						"version":	"1.0.0.5"
 					}, {
 						"name":	"XPlatform",
-						"version":	"1.0.0.4"
+						"version":	"1.0.0.5"
+					}, {
+						"name":	"Sql",
+						"version":	"1.0.0.6"
 					}],
+				"cmd":	"$(Output)",
+				"args":	"$(Output)",
+				"workdir":	"$(ProjectDir)",
 				"ignorewarning":	"",
 				"warexcp":	"",
 				"compdest":	"",
